@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GameFroze AI — Godot Engine Assistant</title>
+
+  <style>
+    :root{
+      --bg: #0b1020;
+      --panel: rgba(255,255,255,.06);
+      --panel-2: rgba(255,255,255,.08);
+      --stroke: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.62);
+      --muted-2: rgba(255,255,255,.45);
+      --accent: #7c5cff;
+      --accent-2: #22c55e;
+      --danger: #ff5c7a;
+
+      --radius: 18px;
+      --shadow: 0 18px 55px rgba(0,0,0,.55);
+      --shadow-soft: 0 10px 26px rgba(0,0,0,.35);
+    }
+
+    *{ box-sizing: border-box; }
+    html, body{ height: 100%; }
+    body{
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color: var(--text);
+      background: radial-gradient(900px 600px at 10% 10%, rgba(124,92,255,.22), transparent 55%),
+                  radial-gradient(800px 520px at 90% 20%, rgba(34,197,94,.16), transparent 55%),
+                  radial-gradient(900px 620px at 50% 95%, rgba(255,92,122,.10), transparent 55%),
+                  var(--bg);
+      display: grid;
+      place-items: center;
+      padding: 22px;
+    }
+
+    .shell{
+      width: min(980px, 100%);
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 18px;
+    }
+
+    /* Left panel */
+    .side{
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+    }
+    .brand{
+      padding: 18px 18px 14px;
+      border-bottom: 1px solid var(--stroke);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo{
+      width: 42px; height: 42px;
+      border-radius: 14px;
+      background: radial-gradient(120% 120% at 20% 15%, rgba(255,255,255,.24), transparent 45%),
+                  linear-gradient(135deg, rgba(124,92,255,1), rgba(34,197,94,.9));
+      box-shadow: 0 12px 30px rgba(124,92,255,.22);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+    .brand h1{
+      margin: 0;
+      font-size: 15px;
+      font-weight: 750;
+      line-height: 1.1;
+    }
+    .brand p{
+      margin: 4px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .meta{
+      padding: 16px 18px 18px;
+      display: grid;
+      gap: 12px;
+    }
+    .pillrow{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .pill{
+      font-size: 12px;
+      color: rgba(255,255,255,.86);
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      padding: 7px 10px;
+      border-radius: 999px;
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      white-space: nowrap;
+    }
+    .dot{
+      width: 8px; height: 8px; border-radius: 999px;
+      background: var(--accent-2);
+      box-shadow: 0 0 0 3px rgba(34,197,94,.12);
+    }
+
+    .card{
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .card h3{
+      margin: 0 0 8px;
+      font-size: 12px;
+      letter-spacing: .2px;
+      color: rgba(255,255,255,.85);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .card ul{
+      margin: 0;
+      padding-left: 16px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+    .hint{
+      color: var(--muted-2);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .kbd{
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      padding: 2px 7px;
+      border-radius: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono";
+      font-size: 11px;
+      color: rgba(255,255,255,.80);
+    }
+
+    /* Main chat */
+    .chat{
+      border: 1px solid var(--stroke);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.035));
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 680px;
+    }
+
+    .topbar{
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--stroke);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .topbar .title{
+      display: grid;
+      gap: 2px;
+    }
+    .topbar .title strong{
+      font-size: 14px;
+      letter-spacing: .2px;
+    }
+    .topbar .title span{
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .actions{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn{
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.86);
+      padding: 8px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 650;
+      font-size: 12px;
+      transition: transform .08s ease, background .12s ease;
+      user-select: none;
+    }
+    .btn:hover{ background: rgba(255,255,255,.085); }
+    .btn:active{ transform: translateY(1px); }
+    .btn.primary{
+      border-color: rgba(124,92,255,.45);
+      background: rgba(124,92,255,.18);
+    }
+    .btn.primary:hover{ background: rgba(124,92,255,.24); }
+
+    #chat-box{
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      scroll-behavior: smooth;
+    }
+
+    .msg{
+      display: grid;
+      gap: 6px;
+      max-width: 86%;
+    }
+    .bubble{
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      padding: 12px 12px;
+      border-radius: 16px;
+      line-height: 1.45;
+      font-size: 14px;
+      box-shadow: 0 10px 22px rgba(0,0,0,.18);
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .meta-line{
+      font-size: 11px;
+      color: var(--muted-2);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .tag{
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.05);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      color: rgba(255,255,255,.72);
+    }
+
+    .user{ align-self: flex-end; }
+    .user .bubble{
+      background: linear-gradient(135deg, rgba(124,92,255,.28), rgba(124,92,255,.14));
+      border-color: rgba(124,92,255,.40);
+    }
+    .bot{ align-self: flex-start; }
+    .bot .bubble{
+      background: rgba(255,255,255,.05);
+    }
+
+    .typing{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dots{
+      display: inline-flex;
+      gap: 4px;
+      transform: translateY(1px);
+    }
+    .dots span{
+      width: 6px; height: 6px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.55);
+      animation: bounce 1s infinite ease-in-out;
+    }
+    .dots span:nth-child(2){ animation-delay: .12s; }
+    .dots span:nth-child(3){ animation-delay: .24s; }
+    @keyframes bounce{
+      0%, 80%, 100%{ transform: translateY(0); opacity: .55; }
+      40%{ transform: translateY(-4px); opacity: .9; }
+    }
+
+    .composer{
+      border-top: 1px solid var(--stroke);
+      background: rgba(0,0,0,.12);
+      padding: 12px 12px 14px;
+    }
+    .row{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .input{
+      flex: 1;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.92);
+      padding: 12px 12px;
+      border-radius: 14px;
+      outline: none;
+      font-size: 14px;
+    }
+    .input:focus{
+      border-color: rgba(124,92,255,.55);
+      box-shadow: 0 0 0 4px rgba(124,92,255,.15);
+    }
+    .foot{
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted-2);
+      font-size: 12px;
+    }
+
+    .status{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .status .dot{
+      width: 9px; height: 9px;
+    }
+    .status.offline .dot{
+      background: var(--danger);
+      box-shadow: 0 0 0 3px rgba(255,92,122,.15);
+    }
+
+    @media (max-width: 860px){
+      .shell{ grid-template-columns: 1fr; }
+      .chat{ min-height: 74vh; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+    <!-- Left panel -->
+    <aside class="side">
+      <div class="brand">
+        <div class="logo">GF</div>
+        <div>
+          <h1>GameFroze AI</h1>
+          <p>Godot Engine assistant · API-powered</p>
+        </div>
+      </div>
+
+      <div class="meta">
+        <div class="pillrow">
+          <div class="pill"><span class="dot"></span> Live API</div>
+          <div class="pill">FastAPI</div>
+          <div class="pill">Qwen2.5 Fine-tuned</div>
+        </div>
+
+        <div class="card">
+          <h3>What it’s good at</h3>
+          <ul>
+            <li>Godot concepts (Scene Tree, Nodes, Signals)</li>
+            <li>GDScript + C# snippets</li>
+            <li>Debugging common errors</li>
+            <li>Project structure suggestions</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3>Try prompts</h3>
+          <div class="hint">
+            • “Explain Scene Tree like I’m new”<br />
+            • “Godot Signals example in C#”<br />
+            • “Why is my CharacterBody2D jittering?”<br />
+            • “How to load scenes efficiently?”
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Shortcuts</h3>
+          <div class="hint">
+            Press <span class="kbd">Enter</span> to send ·
+            <span class="kbd">Shift</span> + <span class="kbd">Enter</span> for new line
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main chat -->
+    <main class="chat">
+      <div class="topbar">
+        <div class="title">
+          <strong>Chat</strong>
+          <span>Ask anything about Godot Engine</span>
+        </div>
+        <div class="actions">
+          <button class="btn" onclick="clearChat()">Clear</button>
+          <button class="btn primary" onclick="insertExample()">Use example prompt</button>
+        </div>
+      </div>
+
+      <div id="chat-box">
+        <div class="msg bot">
+          <div class="meta-line"><span class="tag">GameFroze AI</span><span>Ready</span></div>
+          <div class="bubble">
+Hello! I’m GameFroze AI — your Godot Engine specialist.
+What are you building, and what’s the issue you’re stuck on?
+          </div>
+        </div>
+      </div>
+
+      <div class="composer">
+        <div class="row">
+          <input
+            class="input"
+            type="text"
+            id="user-input"
+            placeholder="Ask a Godot question… (e.g., “Signals in C# example”)"
+            autocomplete="off"
+          />
+          <button class="btn primary" onclick="send()">Send</button>
+        </div>
+
+        <div class="foot">
+          <div class="status" id="status">
+            <span class="dot"></span>
+            <span id="status-text">Connected</span>
+          </div>
+          <div class="hint">CPU demo: keep prompts short for faster replies.</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ✅ Prefer relative URL if this page is hosted on the same Space.
+    // If hosted elsewhere, keep your full hf.space URL.
+    const HF_URL = "https://sonai12aa-gamefroze-chat.hf.space/chat";
+
+    const chatBox = document.getElementById("chat-box");
+    const input = document.getElementById("user-input");
+    const statusEl = document.getElementById("status");
+    const statusText = document.getElementById("status-text");
+
+    // Enter to send, Shift+Enter for newline (works if you change input -> textarea)
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        send();
+      }
+    });
+
+    function timeNow() {
+      const d = new Date();
+      return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    function setStatus(ok, text) {
+      if (ok) {
+        statusEl.classList.remove("offline");
+        statusText.textContent = text || "Connected";
+      } else {
+        statusEl.classList.add("offline");
+        statusText.textContent = text || "Offline";
+      }
+    }
+
+    function addMessage(role, text, metaLabel) {
+      const wrap = document.createElement("div");
+      wrap.className = `msg ${role}`;
+
+      const meta = document.createElement("div");
+      meta.className = "meta-line";
+      meta.innerHTML = `<span class="tag">${metaLabel}</span><span>${timeNow()}</span>`;
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.textContent = text; // safe (prevents HTML injection)
+
+      wrap.appendChild(meta);
+      wrap.appendChild(bubble);
+      chatBox.appendChild(wrap);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      return wrap;
+    }
+
+    function addTyping() {
+      const wrap = document.createElement("div");
+      wrap.className = "msg bot";
+      wrap.id = "typing";
+
+      const meta = document.createElement("div");
+      meta.className = "meta-line";
+      meta.innerHTML = `<span class="tag">GameFroze AI</span><span>${timeNow()}</span>`;
+
+      const bubble = document.createElement("div");
+      bubble.className = "bubble";
+      bubble.innerHTML = `
+        <span class="typing">
+          Thinking
+          <span class="dots"><span></span><span></span><span></span></span>
+        </span>
+      `;
+
+      wrap.appendChild(meta);
+      wrap.appendChild(bubble);
+      chatBox.appendChild(wrap);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function removeTyping() {
+      const t = document.getElementById("typing");
+      if (t) t.remove();
+    }
+
+    function clearChat() {
+      chatBox.innerHTML = "";
+      addMessage(
+        "bot",
+        "Hello! I’m GameFroze AI — your Godot Engine specialist.\nWhat are you building, and what’s the issue you’re stuck on?",
+        "GameFroze AI"
+      );
+    }
+
+    function insertExample() {
+      const examples = [
+        "Explain Godot Scene Tree simply, with a small example.",
+        "Give me a C# Signals example for a Button click in Godot 4.",
+        "My CharacterBody2D jitters when moving. What are common fixes?",
+        "How do I structure a Godot project for a 2D platformer?"
+      ];
+      input.value = examples[Math.floor(Math.random() * examples.length)];
+      input.focus();
+    }
+
+    async function send() {
+      const text = input.value.trim();
+      if (!text) return;
+
+      addMessage("user", text, "You");
+      input.value = "";
+      input.focus();
+
+      addTyping();
+      setStatus(true, "Connected");
+
+      try {
+        const res = await fetch(HF_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: text, max_tokens: 96 })
+        });
+
+        // If backend returns error (e.g., 500/422), show it nicely
+        if (!res.ok) {
+          const errText = await res.text();
+          removeTyping();
+          addMessage("bot", `Server error (${res.status}).\n${errText}`, "Error");
+          setStatus(false, "Server error");
+          return;
+        }
+
+        const data = await res.json();
+        removeTyping();
+        addMessage("bot", data.response || "(No response)", "GameFroze AI");
+      } catch (e) {
+        removeTyping();
+        addMessage(
+          "bot",
+          "Couldn’t reach the API. If you’re hosting this page elsewhere, ensure CORS is enabled and the HF URL is correct.",
+          "Network"
+        );
+        setStatus(false, "Disconnected");
+      }
+
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+  </script>
+</body>
+</html>
