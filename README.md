@@ -44,8 +44,8 @@ The system is designed so that:
 
 ##  Live Demo
 
-- **Hugging Face Space:** *(add your Space link here)*  
-- **Hugging Face Model:** *(add your model link here)*  
+- **Hugging Face Space:** https://huggingface.co/Sonai12aa/qwen2.5-1.5b-godot  
+- **Hugging Face Model:** Sonai12aa/qwen2.5-1.5b-godot
 
 > Note: The demo runs on CPU, so responses may take a few seconds.
 
